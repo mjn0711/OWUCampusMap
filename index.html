@@ -1,0 +1,838 @@
+<html>
+	<head>
+	<link rel="stylesheet" href="css/easy-autocomplete.min.css">
+	<style>
+	body {
+		font-family: sans-serif;
+	}
+/* Map */
+#map-canvas {
+	width: 100%;
+	padding-bottom: 45%;
+	position: relative;
+	z-index: 1;
+}
+@media screen and (max-width: 860px){
+	#map-canvas {
+		padding-bottom: 0;
+		height: 320px;
+	}
+}
+#map {
+   	position: absolute;
+   	top: 0;
+   	left: 0;
+   	height: 100%;
+   	width: 100%;
+}
+/* Info window size (optional) */
+.gomapMarker {
+    display: block;
+    width: 150px;
+    height: auto;
+}
+#infocontainer {
+	position: absolute;
+	top:0;
+	left:0;
+	z-index: 999999;
+	height: 100%;
+	width: 100%;
+	visibility: hidden;
+}
+#infowrapper {
+	display: table;
+	height: 100%;
+	width: 100%;
+	background: rgba(0,0,0,0.75);
+	opacity: 0;
+	transition:all .3s;
+}
+.info #infowrapper {
+	opacity: 1;
+}
+#infowindow {
+	display: table-cell;
+	vertical-align: middle;
+	text-align: center;
+}
+#info {
+	background: #fff;
+	padding:1em;
+	display: inline-block;
+	-webkit-transform: scale(0);
+	-ms-transform: scale(0);
+	transform: scale(0);
+	transition:all .3s;
+}
+.info #info {
+	-webkit-transform: scale(1);
+	-ms-transform: scale(1);
+	transform: scale(1);
+}
+.info #infocontainer {
+	visibility: visible;
+}
+#label {
+	position: absolute;
+	top:0;
+	left:0;
+	text-align: center;
+	max-width: 200px;
+	font-size: 0.825em;
+	background: #fff;
+	padding: 0.5em;
+	border-radius: 2px;
+}
+#label:after {
+	content: '';
+	border-top:8px solid #fff;
+	border-right:8px solid transparent;
+	border-left:8px solid transparent;
+	height: 0;
+	width: 0;
+	position: absolute;
+	bottom:-8px;
+	left:50%;
+	margin-left: -16px;
+}
+.info #label {
+	display: none;
+}
+.gm-style-cc {
+	display: none;
+}
+.filters {
+	margin: -36px 0 0 0;
+	padding:0.5em 0;
+	list-style: none;
+	width: 100%;
+	position: relative;
+	z-index: 99999;
+}
+.filters li {
+	display: inline-block;
+	padding-right: 1em;
+}
+.easy-autocomplete-container {
+	max-height: 200px;
+	overflow-y:scroll;
+	font-size: 1em;
+}
+.easy-autocomplete-container ul li, .easy-autocomplete-container ul .eac-category {
+	font-size: 0.725em;
+}
+.easy-autocomplete-container ul li div {
+	word-break:break-word;
+}
+#building-list-wrapper {
+	display: none;
+	background: #f5f5f5;
+}
+#building-list-wrapper h2 {
+	padding: 0.5em 0.65em;
+	font-weight: normal;
+	margin:0;
+}
+#map-header, .legend {
+	position: relative;
+	z-index: 2;
+	background-color: #111C24;
+}
+.legend {
+	color:#fff;
+}
+#map-header h1 {
+	float: left;
+	color:#fff;
+	margin:0;
+	padding: 0.75em 0;
+	line-height: 1em;
+	font-size: 1.5em;
+	font-weight: normal;
+}
+#search-controls {
+	float: right;
+	margin: 1em 0;
+}
+#search {
+	min-width: 260px;
+	margin-right: 0.5em;
+	display: inline-block;
+	-webkit-appearance:none;
+	border:none;
+	-webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    line-height: 1em;
+    font-size: 1em;
+    padding: 0.25em;
+}
+#search-form {
+	float: left;
+	margin: 0 2em 0 0;
+}
+
+.b_list {
+	float: right;
+	text-decoration: none;
+	color:#fff;
+	text-transform: uppercase;
+	background: #D32D27;
+	padding: 0.5em 1em;
+	font-size: 0.825em;
+	-webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+	line-height: 1em;
+	-webkit-transition:all .3s;
+	-moz-transition:all .3s;
+	-ms-transition:all .3s;
+	-o-transition:all .3s;
+	transition:all .3s;
+}
+.b_list:hover {
+	background: #A51C33;
+}
+.b_list:after {
+	content: '';
+	height: 0;
+	width: 0;
+	border-top: 0.5em solid #fff;
+	border-left: 0.5em solid transparent;
+	border-right: 0.5em solid transparent;
+	float: right;
+	margin: 0.25em 0 0 1em;
+
+}
+.b_list.active:after {
+	border-top: none;
+	border-bottom: 0.5em solid #fff;
+}
+.easy-autocomplete {
+	float: left;
+	margin-right: 0.25em;
+	width: auto!important
+}
+input.building_search_go {
+	-webkit-appearance:none;
+	display: block;
+    	margin: 0;
+    	background: #D32D27;
+    	color: #fff;
+    	padding: 0.5em 1em 0.5em 1em;
+    	-webkit-border-radius: 2px;
+    	-moz-border-radius: 2px;
+    	border-radius: 2px;
+    	border: none;
+    	font-size: 0.825em;
+    	line-height: 1em;
+    	float: left;
+    	cursor: pointer;
+    	text-transform: uppercase;
+    	outline: none;
+    	-webkit-transition:all .3s;
+	-moz-transition:all .3s;
+	-ms-transition:all .3s;
+	-o-transition:all .3s;
+	transition:all .3s;
+}
+input.building_search_go:hover {
+	background: #A51C33;
+}
+.reset {
+	display: block;
+	height: 28px;
+	width: 28px;
+	background-color: #fff;
+	padding: 0px;
+	cursor: pointer;
+	box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+	border-radius: 3px;
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	box-sizing:border-box;
+	position: absolute;
+	left:10px;
+	top:80px;
+}
+.reset span {
+	display: block;
+	height: 100%;
+	width: 100%;
+	background-image: url(reset.png);
+	background-repeat: no-repeat;
+	background-position: 50% 50%;
+	background-size: contain;
+	opacity: 0.71;
+}
+.reset:hover span {
+	opacity: 1;
+}
+#map-wrapper .row { width: 100%; padding: 0 1em; max-width: 80em; margin: 0 auto; -webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}
+#map-wrapper .row.collapsed {padding: 0;}
+#map-wrapper .row:after { content: ""; display: table; clear: both; }
+
+@media screen and (max-width: 960px){
+	#map-header h1 {
+		float: none;
+		text-align: center;
+	}
+	#search-form {
+		margin-right: 1em;
+	}
+	#search-controls {
+		float: none;
+		clear:both;
+		display: table;
+		margin: 0 auto 1em auto;
+	}
+	#search {
+		min-width: auto;
+		width: 100%;
+	}
+
+}
+@media screen and (max-width: 640px){
+
+	.b_list span:first-child {
+		display: none;
+	}
+}
+@media screen and (max-width: 480px){
+	.b_list {
+		height: 2em;
+	}
+	.b_list span {
+		display: none;
+	}
+	.b_list:after {
+		margin: 0.25em 0;
+	}
+}
+@media screen and (max-width: 360px){
+	.easy-autocomplete {
+		max-width: 160px;
+	}
+}
+* {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+
+	box-sizing: border-box;
+}
+#building-list {
+	font-size: 0.625em;
+   	width: 100%;
+   	display: table;
+}
+#map-wrapper #building-list-wrapper .row {
+	padding: 0;
+}
+#building-list p, #building-list h4 {
+	padding: 0.5em 1em;
+	margin: 0;
+	line-height: 1.25em;
+}
+#building-list h4 { 
+	margin-bottom: 1em;
+}
+#building-list ul {
+	margin: 0;
+	padding: 0 1em;
+}
+#building-list ul li {
+	
+}
+#building-list ul li ul {
+	margin: 0.5em 0 0 0.25em;
+}
+#building-list li {
+	margin-bottom:0.5em;
+	line-height: 1.25em;
+	list-style:none;
+}
+
+.locations li[data-category]:hover {
+	color:#A51C33;
+	cursor: pointer;
+}
+.locations li[data-category] {
+	display: table-row;
+}
+.locations li[data-category] span {
+	display: table-cell;
+	padding-bottom: 0.5em;
+}
+.locations li span.number {
+	padding-right: 0.5em;
+	text-align: right;
+}
+.ResidentialandStudentLife, .Athletics, .Academics, .Other {
+	padding-bottom: 1em;
+}
+.ResidentialandStudentLife {
+	background: #bcd6e8;
+}
+.Academics {
+	background: #dfbaba;
+}
+.Academics h4 {
+	background: #96191c;
+	color:#fff;
+	text-transform: uppercase;
+}
+.Athletics {
+	background: #fcedbf;
+}
+.Athletics h4 {
+	background: #f5c52c;
+	color:#fff;
+	text-transform: uppercase;
+}
+.Other {
+	background: #dadfc3;
+}
+.Other h4 {
+	background: #839639;
+	color:#fff;
+	text-transform: uppercase;
+}
+.ResidentialandStudentLife h4 {
+	color:#fff;
+	text-transform: uppercase;
+	background-color: #2177b3;
+}
+#building-list .col, #building-list .tc {
+	display: table-cell;
+}
+#building-list .Athletics.col, #building-list .Other.col {
+	display: block;
+}
+#building-list .col.ResidentialandStudentLife {
+	width: 50%;
+}
+.columnOne, .columnTwo {
+	width:50%;
+	float: left;
+}
+@media screen and (max-width: 640px){
+	#building-list {
+		display: block;
+	}
+	#building-list .col.ResidentialandStudentLife {
+		width: 100%;
+		display: block;
+	}
+}
+</style>
+
+	</head>
+	<body>
+	<div id="map-wrapper">
+	<div id="map-header">
+		<div class="row">
+			<h1>Explore Ohio Wesleyan</h1>
+			<div id="search-controls">
+				<form id="search-form"><input id="search" placeholder="Building Search"><input type="button" value="Go" class="building_search_go" onclick="listsearch();"></form>
+				<a href="#" class="b_list"><span>View Complete</span><span> Building List</span></a>
+			</div>
+		</div>
+	</div>
+	<div id="building-list-wrapper">
+		<div class="row">
+			<h2>Ohio Wesleyan University Campus Facilities</h2>
+		</div>
+		<div class="row">
+			<div id="building-list"></div>
+		</div>
+	</div>
+	<div id="map-canvas">
+		<div id="map"></div>
+		<div style="height:38px; width:100%; position:absolute; bottom:-2px; left:0; background:#fff; z-index:999999;"></div>
+		<div id="infocontainer"><div id="infowrapper"><div id="infowindow"><div id="info"></div></div></div></div>
+		<div id="label"></div>
+		<span class="reset"><span></span></span>
+	</div>
+	<div class="legend"><div class="row"></div></div>
+	</div>
+
+
+		<script type="text/javascript" src="http://maps.google.com/maps/api/js"></script>
+		<script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+		<script type="text/javascript" src="js/campusMap.js"></script>
+		<script type="text/javascript" src="js/jquery.easy-autocomplete.min.js"></script>
+		<script>
+
+if (!$.concat) {
+    $.extend({
+        concat: function(a, b) {
+            return a.concat(b);
+        }
+    });
+};
+//Load this url in browser to find sheet ID of the spreadsheet
+//https://spreadsheets.google.com/feeds/worksheets/1Sltr0KbfWxpU2OcW5XdhvoXqnwcSrZfeXrzRMII-hig/private/full
+
+var dataObj = [];
+
+var poi = [];
+var poiCategories = [];
+var res = [];
+var marker;
+var Markers = [];
+
+$.getJSON( "https://spreadsheets.google.com/feeds/list/1MwzESbDehqO9NQoBtLaC94kcki-AyQloy1Fy6soyGd0/od6/public/values?alt=json-in-script&callback=?", function (dataset1) {
+        	//processData(data);
+        	getNextData(dataset1);
+});
+function getNextData(dataset1){
+	$.getJSON( "https://spreadsheets.google.com/feeds/list/1MwzESbDehqO9NQoBtLaC94kcki-AyQloy1Fy6soyGd0/o9eqbby/public/values?alt=json-in-script&callback=?", function (dataset2) {
+		mergeData(dataset1, dataset2);
+	});
+}
+function mergeData(dataset1, dataset2){
+	$.each(dataset2.feed.entry, function( index, value ) {
+		dataset1.feed.entry.push({'gsx$number':{'$t':value.gsx$number.$t},'gsx$category':{'$t':value.gsx$category.$t}, 'gsx$latitude':{'$t':value.gsx$latitude.$t}, 'gsx$longitude':{'$t':value.gsx$longitude.$t}, 'gsx$title':{'$t':value.gsx$title.$t}, 'gsx$photourl':{'$t':value.gsx$photourl.$t}, 'gsx$description':{'$t':value.gsx$description.$t}});
+	});
+	var data = dataset1;
+	processData(data);
+}
+
+function processData(data){
+	$.each(data.feed.entry, function( index, value ) {
+		console.log(value);
+		var c = value.gsx$category.$t;
+		poiCategories.push(c);
+		var p = {'number':value.gsx$number.$t,'id':value.gsx$category.$t, 'latitude':value.gsx$latitude.$t, 'longitude':value.gsx$longitude.$t, 'title':value.gsx$title.$t, 'media':value.gsx$photourl.$t, 'description':value.gsx$description.$t}
+		poi.push(p);
+	});
+	poiCategories = unique(poiCategories);
+	createCategoryFilter(poiCategories, poi);
+//Populate AutoComplete Search
+	var options = {
+		data: poi,
+		getValue: "title",
+		template: {
+			type: "custom",
+			method: function(value, item) {
+				return '<span data-lat="'+item.latitude+'" data-lng="'+item.longitude+'" data-category="'+item.category+'">'+value+'</span>';
+			}
+		},
+		list: {
+			maxNumberOfElements: 50,
+			match: {
+				enabled: true
+			}
+		}
+	};
+	$("#search").easyAutocomplete(options);
+
+	initMap();
+}
+
+function createCategoryFilter(poiCategories, poi){
+	$('body').remove('ul.filters');
+	$('#building-list').empty();
+	$('#map-wrapper .legend .row').append('<ul class="filters"></ul>');
+	//poiCategories.sort();
+	//Sort the categories
+	poiCategories.sort(function(a, b){return b-a});
+	//Pull 'Other' out and put it at the end
+	for(var i = poiCategories.length - 1; i >= 0; i--) {
+    	if(poiCategories[i] === 'Other') {
+    	   poiCategories.splice(i, 1);
+    	}
+	}
+	poiCategories.push('Other');
+	$.each(poiCategories, function( index, value ) {
+		var css = value.replace(/\s+/g, '');
+		$('.filters').append('<li class="'+css+'" data-category="'+value+'">'+value+' Facilities</li>');
+		//$('#building-list').append('<div><h4>'+value+'</h4></div>');
+		if(value !== 'Phone' && value !== 'Bus' && value !== 'Parking'){
+			$('#building-list').append('<div class="'+css+' col"><h4>'+value+'</h4><ul class="locations"></ul></div>');
+		}
+		$.each(poi, function( pi, pv ) {
+			if(pv.id == value){
+				var className = value.replace(/\s+/g, '');
+				if(pv.id == 'Residential and Student Life'){
+					res.push(pv);
+				} else {
+					if(pv.id !== 'Phone' && pv.id !== 'Bus' && pv.id !== 'Parking'){
+						$('#building-list .'+className+' ul.locations').append('<li data-category="'+pv.id+'" data-latitude="'+pv.latitude+'" data-longitude="'+pv.longitude+'"><span class="number">'+pv.number+'.</span><span class="label">'+pv.title+'</span></li>');
+					}
+				}
+			}
+		});
+	});
+	$(".Athletics.col").next('div').andSelf().wrapAll('<div id="tc" />');
+	var firstCol = Math.floor(res.length/2);
+	var secondCol = Math.floor(res.length/2);
+	$('#building-list .ResidentialandStudentLife ul.locations').addClass('columnOne');
+	$('#building-list .ResidentialandStudentLife').append('<ul class="locations columnTwo"></ul>');
+	for(var i=0;i<firstCol;i++){
+		if(res[i].number.charAt(0) == '9'){
+			if($('ul.slus').length<=0){
+				$('#building-list .ResidentialandStudentLife ul.columnOne').append('<li><span class="number">9.</span><span>Small Living Units (SLU\'s)</span><ul class="slus"></ul></li>');
+			} else {
+				$('#building-list ul.columnOne li ul.slus').append('<li data-category="'+res[i].id+'" data-latitude="'+res[i].latitude+'" data-longitude="'+res[i].longitude+'"><span class="number">'+res[i].number+'.</span><span class="label">'+res[i].title+'</span></li>');
+			}
+		} else {
+			$('#building-list .ResidentialandStudentLife ul.locations.columnOne').append('<li data-category="'+res[i].id+'" data-latitude="'+res[i].latitude+'" data-longitude="'+res[i].longitude+'"><span class="number">'+res[i].number+'.</span><span class="label">'+res[i].title+'</span></li>');
+		}
+	}
+	for(var i=firstCol;i<res.length;i++){
+		if(res[i].number.charAt(0) == '9'){
+			if($('ul.slus').length<=0){
+				$('#building-list .ResidentialandStudentLife ul.columnTwo').append('<li><span class="number">9.</span><span>Small Living Units (SLU\'s)</span><ul class="slus"></ul></li>');
+			} else {
+				$('#building-list ul.columnTwo li ul.slus').append('<li data-category="'+res[i].id+'" data-latitude="'+res[i].latitude+'" data-longitude="'+res[i].longitude+'"><span class="number">'+res[i].number+'.</span><span class="label">'+res[i].title+'</span></li>');
+			}
+		} else {
+			$('#building-list .ResidentialandStudentLife ul.locations.columnTwo').append('<li data-category="'+res[i].id+'" data-latitude="'+res[i].latitude+'" data-longitude="'+res[i].longitude+'"><span class="number">'+res[i].number+'.</span><span class="label">'+res[i].title+'</span></li>');
+		}
+	}
+}
+
+
+function unique(list) {
+  	var result = [];
+  	$.each(list, function(i, e) {
+    		if ($.inArray(e, result) == -1) result.push(e);
+  	});
+ 	 return result;
+}
+$('#building-list').on('click', 'li[data-category]', function(){
+	var lat = $(this).data('latitude');
+	var lng = $(this).data('longitude');
+	console.log(lat);
+	console.log(lng);
+	var latLng = new google.maps.LatLng(lat, lng);
+    map.panTo(latLng); //Make map global
+    map.setZoom(24);
+    $('.b_list').toggleClass('active');
+	$('#building-list-wrapper').stop().slideToggle(300);
+});
+
+function listsearch(){
+	var lat = $('#eac-container-search .selected .eac-item span').data('lat');
+	var lng = $('#eac-container-search .selected .eac-item span').data('lng');
+	console.log(lat);
+	console.log(lng);
+	var latLng = new google.maps.LatLng(lat, lng);
+    map.panTo(latLng); //Make map global
+    map.setZoom(24);
+}
+
+// creating the map
+function initMap(){
+	Markers = [];
+    	var center = {lat: 40.296619, lng: -83.070023};
+    	var bounds = new google.maps.LatLngBounds();
+    	var mapOptions = {
+        	center: center,
+        	scrollwheel: false,
+        	zoom:16,
+        	maxZoom:28,
+        	maxBounds: bounds,
+        	minZoom: 15,
+        	disableDefaultUI: true,
+        	zoomControl: true,
+        	zoomControlOptions: {
+            	position: google.maps.ControlPosition.LEFT_TOP
+    		},
+    		mapTypeId: google.maps.MapTypeId.ROADMAP
+    	}
+
+   	map = new google.maps.Map(document.getElementById("map"), mapOptions);
+	var iconBase = 'https://www.owu.edu/ex/campusmap/markers/img/mapmarkers/';
+//Need this to get marker position for tooltip
+	helper = new google.maps.OverlayView();
+	helper.setMap(map);
+	helper.draw = function () {
+    		if (!this.ready) {
+        		this.ready = true;
+        		google.maps.event.trigger(this, 'ready');
+    		}
+	};
+
+	$.each(poi, function(index, value){
+		var position = new google.maps.LatLng(parseFloat(value.latitude), parseFloat(value.longitude));
+		if(value.number != ''){
+			if (value.number.match(/[a-z]/i)) {
+				var iconImage = value.number.replace(/[0-9]/g, '').toLowerCase();
+			
+			} else {
+				var iconImage = value.number
+			}
+		} else {
+			var iconImage = value.id.toLowerCase();
+			
+		}
+		var image = {
+    			url: iconBase+iconImage+'.png',
+    			size: new google.maps.Size(91, 91),
+    			origin: new google.maps.Point(0, 0),
+  			anchor: new google.maps.Point(23, 23),
+    			scaledSize: new google.maps.Size(46, 46)
+  		};
+		marker = new google.maps.Marker({
+    			position: position,
+    			media: value.media,
+    			description:value.description,
+    			mtitle:value.title,
+    			id:value.id,
+    			icon:image,
+    			map: map
+  		});
+  		bounds.extend(position);
+		marker.addListener('click', function(event){
+			var latitude = event.latLng.lat();
+    			var longitude = event.latLng.lng();
+    			var $this = this;
+    			info($this, latitude, longitude);
+		});
+		marker.addListener('mouseover', function(event){
+			event.preventDefault;
+			var latitude = event.latLng.lat();
+    			var longitude = event.latLng.lng();
+    			var $this = this;
+    			label($this, latitude, longitude);
+		});
+		marker.addListener('mouseout', function(event){
+			event.preventDefault;
+			$('#label').hide();
+		});
+		Markers.push(marker);
+	});
+	console.log(bounds.H);
+	console.log(bounds.j.j);
+	//map.fitBounds(bounds);
+	//map.panToBounds(bounds);
+
+
+//when the map zoom changes, resize the icon based on the zoom level
+	google.maps.event.addListener(map, 'zoom_changed', function() {
+		var pixelSizeAtZoom0 = 46; //the size of the icon at zoom level 0
+    		var maxPixelSize = 91; //restricts the maximum size of the icon, otherwise the browser will choke at higher zoom levels trying to scale an image to millions of pixels
+    		var zoom = map.getZoom();
+    		if(zoom>18){
+    			var relativePixelSize = Math.round(zoom*3.875);
+    		} else {
+    			var relativePixelSize = Math.round(zoom*2.875);
+    		}
+
+    		if(relativePixelSize > maxPixelSize) //restrict the maximum size of the icon
+        		relativePixelSize = maxPixelSize;
+
+    		//change the size of the icon
+    		for(var i = 0; i < Markers.length; i++) {
+    			Markers[i].setIcon(
+        			new google.maps.MarkerImage(
+            			Markers[i].getIcon().url, //marker's same icon graphic
+            			null,//size
+            			null,//origin
+            			null, //anchor
+            			new google.maps.Size(relativePixelSize, relativePixelSize) //changes the scale
+       			)
+    			);
+		};
+	});
+	
+	//map.fitBounds(bounds);
+	$('.reset').on('click', function(){
+		var center = {lat: 40.296619, lng: -83.070023};
+		map.setCenter(center);
+		map.setZoom(16);
+	//alert('clicked');
+	//map.setZoom(2);
+	//for (h = 0; h < markers.length; h++) {
+      //              markers[h].infobox.close();
+      //         }
+	//map.fitBounds(bounds);
+	//initialize();
+})
+
+	function info($this, latitude, longitude){
+		var latlng = new google.maps.LatLng(latitude, longitude);
+		pixelpos = helper.getProjection().fromLatLngToContainerPixel(latlng);
+
+		//console.log(pixelpos);
+		$('#info').empty();
+		$('#info').append($this.mtitle+'<img src="'+$this.media+'">'+$this.description);
+		$('#map-canvas').addClass('info');
+	}
+
+	function label($this, latitude, longitude){
+		var mHeight = $this.icon.scaledSize.height+20;
+		var latlng = new google.maps.LatLng(latitude, longitude);
+		pixelpos = helper.getProjection().fromLatLngToContainerPixel(latlng);
+		$('#label').empty();
+		$('#label').append($this.mtitle);
+		$('#label').addClass('show').css({'top':pixelpos.y-($('#label').height()+mHeight)+'px', 'left':pixelpos.x-($('#label').width()/2)+'px'});
+		$('#label').show();
+	}
+	$('#infocontainer').on('click', function(){
+		$('#map-canvas').removeClass('info');
+	})
+	$("#info").click(function(e) {
+        	e.stopPropagation();
+   	});
+
+	// Bounds for Campus
+      var strictBounds = new google.maps.LatLngBounds(
+  		new google.maps.LatLng(40.290456, -83.079065),
+  		new google.maps.LatLng(40.301692, -83.061571)
+	);
+
+            // Listen for the dragend event
+            google.maps.event.addListener(map, 'bounds_changed', function() {
+                if (strictBounds.contains(map.getCenter())) return;
+
+                // We're out of bounds - Move the map back within the bounds
+                var c = map.getCenter(),
+                x = c.lng(),
+                y = c.lat(),
+                maxX = strictBounds.getNorthEast().lng(),
+                maxY = strictBounds.getNorthEast().lat(),
+                minX = strictBounds.getSouthWest().lng(),
+                minY = strictBounds.getSouthWest().lat();
+                if (x < minX) x = minX;
+                if (x > maxX) x = maxX;
+                if (y < minY) y = minY;
+                if (y > maxY) y = maxY;
+
+                map.setCenter(new google.maps.LatLng(y, x));
+                
+            });
+google.maps.event.addDomListener(window, 'resize', initMap);
+//google.maps.event.addDomListener(window, 'resize', function() {
+//    map.setCenter(center);
+//});
+}
+google.maps.event.addDomListener(window, 'resize', initMap);
+
+$('body').on('click', '.filters li', function(){
+	var $filter = $(this);
+	var filter = $filter.data('category');
+	$filter.toggleClass('active');
+	for (var i = 0; i< Markers.length; i++){
+		if(Markers[i].id == filter){
+			if($filter.hasClass('active')){
+         			Markers[i].setVisible(false);
+         		} else {
+         			Markers[i].setVisible(true);
+         		}
+         	}
+     	}
+});
+$('.b_list').on('click', function(e){
+	e.preventDefault();
+	$(this).toggleClass('active');
+	$('#building-list-wrapper').stop().slideToggle(300);
+});
+
+
+		</script>
+	</body>
+</html>
